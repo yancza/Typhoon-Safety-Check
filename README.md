@@ -1,2 +1,2 @@
 # Typhoon-Safety-Check
-Paynals Web Sistim
+Finals Web System
