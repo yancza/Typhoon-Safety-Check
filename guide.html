@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safety Guide | Typhoon Safety Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">Typhoon Safety Check</a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="guide.html" aria-current="page">Safety Guide</a>
+      <a href="contacts.html">Contacts</a>
+      <a href="reminders.html">Reminders</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <h1>Safety guide</h1>
+      <p>What to do at each stage of a typhoon.</p>
+    </section>
+
+    <section class="section">
+      <div class="guide-grid">
+        <article class="guide-card" id="guide-before" data-phase="before">
+          <h2>Before</h2>
+          <ul>
+            <li>Prepare your supplies.</li>
+            <li>Charge phones and power banks.</li>
+            <li>Secure windows, doors, and loose objects outside.</li>
+            <li>Know where your family will go if you need to evacuate.</li>
+          </ul>
+        </article>
+        <article class="guide-card" id="guide-during" data-phase="during">
+          <h2>During</h2>
+          <ul>
+            <li>Stay indoors, away from windows.</li>
+            <li>Listen to a radio or official updates.</li>
+            <li>Avoid floodwater and unplug appliances if water enters.</li>
+            <li>Evacuate only when authorities say it is safe to move.</li>
+          </ul>
+        </article>
+        <article class="guide-card" id="guide-after" data-phase="after">
+          <h2>After</h2>
+          <ul>
+            <li>Check for hazards like fallen wires and weak structures.</li>
+            <li>Stay out of flooded areas.</li>
+            <li>Boil or treat water if you are unsure it is safe.</li>
+            <li>Check on family and neighbors.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="page-cta"><a class="btn" href="checklist.html">Go to my checklist</a></p>
+    </section>
+
+    <section class="section" id="signals">
+      <h2 class="section-title">Wind signal guide</h2>
+      <p class="section-intro">PAGASA uses Tropical Cyclone Wind Signals 1 to 5. A higher number means stronger winds and less time to prepare.</p>
+
+      <!-- JS: on "change" of #signal-select, show matching info in #signal-result
+           and add .is-selected to the matching row in the table -->
+      <div class="signal-picker">
+        <label for="signal-select">Choose a wind signal</label>
+        <select id="signal-select" name="signal">
+          <option value="">Select a signal...</option>
+          <option value="1">Signal No. 1</option>
+          <option value="2">Signal No. 2</option>
+          <option value="3">Signal No. 3</option>
+          <option value="4">Signal No. 4</option>
+          <option value="5">Signal No. 5</option>
+        </select>
+      </div>
+      <div id="signal-result" class="signal-result" aria-live="polite">
+        <p>Pick a signal to see what it means and what to do.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="signal-table" id="signal-table">
+          <caption class="sr-only">Wind signals compared</caption>
+          <thead>
+            <tr><th scope="col">Signal</th><th scope="col">Wind</th><th scope="col">Speed</th><th scope="col">Lead time</th><th scope="col">Threat</th><th scope="col">What to do</th></tr>
+          </thead>
+          <tbody>
+            <tr data-signal="1"><th scope="row">Signal 1</th><td>Strong winds</td><td>39 to 61 km/h</td><td>36 hours</td><td>Minimal to minor threat to life and property.</td><td>Start preparing now. Check your kit and charge your devices.</td></tr>
+            <tr data-signal="2"><th scope="row">Signal 2</th><td>Gale-force winds</td><td>62 to 88 km/h</td><td>24 hours</td><td>Minor to moderate threat to life and property.</td><td>Secure loose objects. Finish packing your emergency kit.</td></tr>
+            <tr data-signal="3"><th scope="row">Signal 3</th><td>Storm-force winds</td><td>89 to 117 km/h</td><td>18 hours</td><td>Moderate to significant threat to life and property.</td><td>Stay indoors. Follow instructions from local authorities.</td></tr>
+            <tr data-signal="4"><th scope="row">Signal 4</th><td>Typhoon-force winds</td><td>118 to 184 km/h</td><td>12 hours</td><td>Significant to severe threat to life and property.</td><td>Stay in a safe, strong building. Evacuate if told to.</td></tr>
+            <tr data-signal="5"><th scope="row">Signal 5</th><td>Typhoon-force winds, highest level</td><td>185 km/h or higher</td><td>12 hours</td><td>Extremely high threat to life and property.</td><td>Stay in a safe place and follow evacuation orders immediately.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="signal-note">Wind speeds and lead times follow PAGASA. Always check the latest official bulletin for your area.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Typhoon Safety Check.</p>
+  </footer>
+
+<script>
+  // script.js - Typhoon Safety Check
+// Wind signal picker for guide.html
+
+document.addEventListener("DOMContentLoaded", function () {
+  var select = document.getElementById("signal-select");
+  var result = document.getElementById("signal-result");
+  var rows = document.querySelectorAll("#signal-table tbody tr");
+
+  // If this page has no signal picker (other pages share this file), stop here.
+  if (!select || !result) return;
+
+  select.addEventListener("change", function () {
+    var value = select.value;
+
+    // 1. Remove the highlight from every row
+    rows.forEach(function (row) {
+      row.classList.remove("is-selected");
+    });
+
+    // 2. Nothing chosen: show the default message
+    if (value === "") {
+      result.innerHTML = "<p>Pick a signal to see what it means and what to do.</p>";
+      return;
+    }
+
+    // 3. Find the matching table row (for example data-signal="3")
+    var row = document.querySelector('#signal-table tr[data-signal="' + value + '"]');
+    if (!row) return;
+
+    // 4. Highlight that row
+    row.classList.add("is-selected");
+
+    // 5. Read the row's cells and show them in the result box
+    var cells = row.querySelectorAll("th, td");
+    // cells: 0 = Signal, 1 = Wind, 2 = Speed, 3 = Lead time, 4 = Threat, 5 = What to do
+
+    result.innerHTML =
+      "<h3>" + cells[0].textContent + ": " + cells[1].textContent + "</h3>" +
+      "<p><strong>Speed:</strong> " + cells[2].textContent + "</p>" +
+      "<p><strong>Lead time:</strong> " + cells[3].textContent + "</p>" +
+      "<p><strong>Threat:</strong> " + cells[4].textContent + "</p>" +
+      "<p><strong>What to do:</strong> " + cells[5].textContent + "</p>";
+  });
+});
+</script>>
+</body>
+</html>
