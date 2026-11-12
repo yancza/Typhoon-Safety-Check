@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contacts | Typhoon Safety Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  
+  <header class="site-header">
+    <a class="brand" href="index.html">Typhoon Safety Check</a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="guide.html">Safety Guide</a>
+      <a href="contacts.html" aria-current="page">Contacts</a>
+      <a href="reminders.html">Reminders</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <h1>Emergency contacts</h1>
+      <p>Save the people and offices you may need to reach during a typhoon.</p>
+    </section>
+
+    <section class="section">
+      <div class="contacts-layout">
+
+        <!-- JS: on submit -> preventDefault, validate, add to list, save to localStorage.
+             Show problems in #contact-error. novalidate lets JS control the messages. -->
+        <form id="contact-form" class="kit-card contact-form" novalidate>
+          <h2>Add a contact</h2>
+
+          <div class="field">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" name="name" maxlength="40" placeholder="e.g. Mama, Barangay Hall" autocomplete="off">
+          </div>
+
+          <div class="field">
+            <label for="contact-phone">Phone number</label>
+            <input type="tel" id="contact-phone" name="phone" maxlength="20" inputmode="tel" placeholder="e.g. 0912 345 6789" autocomplete="off">
+          </div>
+
+          <div class="field">
+            <label for="contact-type">Type</label>
+            <select id="contact-type" name="type">
+              <option value="Family">Family</option>
+              <option value="Neighbor">Neighbor</option>
+              <option value="Local office">Local office</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <p id="contact-error" class="form-error" role="alert" hidden></p>
+
+          <div class="kit-actions">
+            <button type="submit" class="btn" id="add-contact-btn">Add contact</button>
+            <button type="reset" class="btn btn-light" id="clear-form-btn">Clear form</button>
+          </div>
+        </form>
+
+        <!-- JS: add one <li class="contact-item"> per contact (copy #contact-template)
+             and hide #contact-empty once there is at least one -->
+        <section class="progress-card contacts-card" aria-labelledby="contacts-heading">
+          <h2 id="contacts-heading">My saved contacts</h2>
+          <p id="contact-empty" class="contact-empty">No contacts yet. Add one using the form.</p>
+          <ul id="contact-list" class="contact-list"></ul>
+          <button type="button" class="btn btn-light" id="clear-contacts-btn">Delete all contacts</button>
+        </section>
+
+      </div>
+
+      <template id="contact-template">
+        <li class="contact-item" data-id="">
+          <div class="contact-info">
+            <strong class="contact-name"></strong>
+            <span class="contact-phone"></span>
+            <span class="contact-type"></span>
+          </div>
+          <button type="button" class="contact-delete" aria-label="Delete contact">Delete</button>
+        </li>
+      </template>
+    </section>
+
+  </main>
+
+  
+  <footer class="site-footer">
+    <p>Typhoon Safety Check.</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checklist | Typhoon Safety Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+ 
+  <header class="site-header">
+    <a class="brand" href="index.html">Typhoon Safety Check</a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="checklist.html" aria-current="page">Checklist</a>
+      <a href="guide.html">Safety Guide</a>
+      <a href="contacts.html">Contacts</a>
+      <a href="reminders.html">Reminders</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <h1>Emergency kit checklist</h1>
+      <p>Tick each item you already have. The count updates as you go.</p>
+    </section>
+
+    <section class="section">
+      <div class="kit-layout">
+
+        <!-- JS: listen for "change" on .kit-item -->
+        <form id="kit-form" class="kit-card" aria-label="Emergency kit checklist">
+          <ul class="kit-list">
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-water" name="kit" value="water" data-item="water">
+              <label for="item-water"><span class="kit-icon" aria-hidden="true">💧</span>Drinking water</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-food" name="kit" value="food" data-item="food">
+              <label for="item-food"><span class="kit-icon" aria-hidden="true">🥫</span>Ready-to-eat food</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-flashlight" name="kit" value="flashlight" data-item="flashlight">
+              <label for="item-flashlight"><span class="kit-icon" aria-hidden="true">🔦</span>Flashlight and batteries</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-firstaid" name="kit" value="firstaid" data-item="firstaid">
+              <label for="item-firstaid"><span class="kit-icon" aria-hidden="true">🩹</span>First-aid kit</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-powerbank" name="kit" value="powerbank" data-item="powerbank">
+              <label for="item-powerbank"><span class="kit-icon" aria-hidden="true">🔋</span>Charged phone and power bank</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-radio" name="kit" value="radio" data-item="radio">
+              <label for="item-radio"><span class="kit-icon" aria-hidden="true">📻</span>Battery-powered radio</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-documents" name="kit" value="documents" data-item="documents">
+              <label for="item-documents"><span class="kit-icon" aria-hidden="true">📄</span>Important documents in a waterproof bag</label>
+            </li>
+            <li class="kit-row">
+              <input type="checkbox" class="kit-item" id="item-medicine" name="kit" value="medicine" data-item="medicine">
+              <label for="item-medicine"><span class="kit-icon" aria-hidden="true">💊</span>Personal medicines</label>
+            </li>
+          </ul>
+          <div class="kit-actions">
+            <button type="button" class="btn" id="check-all-btn">Check all</button>
+            <button type="button" class="btn btn-light" id="reset-btn">Clear checklist</button>
+          </div>
+        </form>
+
+        <!-- JS: update count, total, bar value, message -->
+        <aside class="progress-card" id="progress-card" aria-live="polite">
+          <h2>My progress</h2>
+          <p class="progress-count">Items ready: <strong><span id="progress-count">0</span> of <span id="progress-total">8</span></strong></p>
+          <progress id="progress-bar" value="0" max="8">0 of 8</progress>
+          <!-- JS: set text of #readiness-label and swap its class:
+               readiness-not (0-3 items), readiness-almost (4-7), readiness-ready (all 8) -->
+          <p class="readiness-row">Readiness: <span id="readiness-label" class="readiness readiness-not">Not ready</span></p>
+          <p class="readiness-legend">0 to 3 items: Not ready. 4 to 7: Almost ready. All 8: Ready.</p>
+          <p id="progress-message" class="progress-message">Nothing checked yet. Start with drinking water.</p>
+          <p class="progress-note">Keep checking your kit. Follow official advisories.</p>
+          <a class="btn btn-light next-link" href="guide.html">Read the safety guide</a>
+        </aside>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Typhoon Safety Check.</p>
+  </footer>
+
+
+<script>
+/* ==========================================================
+   Typhoon Safety Check - script.js
+   One file for all pages. Each section only runs if its
+   elements exist on the current page.
+   Features:
+   1. Emergency kit checklist (progress + localStorage)
+   2. Wind signal picker (guide page)
+   3. Emergency contacts (form + localStorage)
+   ========================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  initChecklist();
+  initSignalPicker();
+  initContacts();
+});
+
+/* ---------- Helper: safe localStorage ---------- */
+function loadData(key, fallback) {
+  try {
+    var saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function saveData(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    /* storage may be blocked; the page still works without saving */
+  }
+}
+
+/* ==========================================================
+   1. CHECKLIST PAGE
+   ========================================================== */
+function initChecklist() {
+  var form = document.getElementById("kit-form");
+  if (!form) return;
+
+  var STORAGE_KEY = "typhoonKitChecked";
+  var items = document.querySelectorAll(".kit-item");
+  var countEl = document.getElementById("progress-count");
+  var totalEl = document.getElementById("progress-total");
+  var bar = document.getElementById("progress-bar");
+  var label = document.getElementById("readiness-label");
+  var message = document.getElementById("progress-message");
+  var checkAllBtn = document.getElementById("check-all-btn");
+  var resetBtn = document.getElementById("reset-btn");
+
+  // Restore saved selections
+  var saved = loadData(STORAGE_KEY, []);
+  items.forEach(function (item) {
+    item.checked = saved.indexOf(item.dataset.item) !== -1;
+  });
+
+  function updateProgress() {
+    var total = items.length;
+    var count = 0;
+    var checkedNames = [];
+
+    items.forEach(function (item) {
+      if (item.checked) {
+        count++;
+        checkedNames.push(item.dataset.item);
+      }
+    });
+
+    // Numbers and bar
+    countEl.textContent = count;
+    totalEl.textContent = total;
+    bar.max = total;
+    bar.value = count;
+    bar.textContent = count + " of " + total;
+
+    // Readiness level
+    label.classList.remove("readiness-not", "readiness-almost", "readiness-ready");
+    if (count === total) {
+      label.textContent = "Ready";
+      label.classList.add("readiness-ready");
+      message.textContent = "Great job! Your emergency kit is complete.";
+    } else if (count >= 4) {
+      label.textContent = "Almost ready";
+      label.classList.add("readiness-almost");
+      message.textContent = "You are close. " + (total - count) + " more item(s) to go.";
+    } else {
+      label.textContent = "Not ready";
+      label.classList.add("readiness-not");
+      message.textContent = count === 0
+        ? "Nothing checked yet. Start with drinking water."
+        : "Keep going. Gather the remaining items.";
+    }
+
+    saveData(STORAGE_KEY, checkedNames);
+  }
+
+  items.forEach(function (item) {
+    item.addEventListener("change", updateProgress);
+  });
+
+  checkAllBtn.addEventListener("click", function () {
+    items.forEach(function (item) { item.checked = true; });
+    updateProgress();
+  });
+
+  resetBtn.addEventListener("click", function () {
+    items.forEach(function (item) { item.checked = false; });
+    updateProgress();
+  });
+
+  updateProgress();
+}
+
+/* ==========================================================
+   2. GUIDE PAGE - WIND SIGNAL PICKER
+   Reads the info straight from the table, so the text only
+   has to be written once in the HTML.
+   ========================================================== */
+function initSignalPicker() {
+  var select = document.getElementById("signal-select");
+  var result = document.getElementById("signal-result");
+  var rows = document.querySelectorAll("#signal-table tbody tr");
+  if (!select || !result) return;
+
+  select.addEventListener("change", function () {
+    var value = select.value;
+
+    // Remove old highlight
+    rows.forEach(function (row) { row.classList.remove("is-selected"); });
+
+    // Nothing selected: show default message
+    if (value === "") {
+      result.innerHTML = "<p>Pick a signal to see what it means and what to do.</p>";
+      return;
+    }
+
+    var row = document.querySelector('#signal-table tr[data-signal="' + value + '"]');
+    if (!row) return;
+
+    row.classList.add("is-selected");
+
+    var cells = row.querySelectorAll("th, td");
+    // cells: 0 Signal, 1 Wind, 2 Speed, 3 Lead time, 4 Threat, 5 What to do
+    result.innerHTML = "";
+
+    var title = document.createElement("h3");
+    title.textContent = cells[0].textContent + ": " + cells[1].textContent;
+    result.appendChild(title);
+
+    var details = [
+      ["Wind speed", cells[2].textContent],
+      ["Lead time", cells[3].textContent],
+      ["Threat", cells[4].textContent],
+      ["What to do", cells[5].textContent]
+    ];
+
+    details.forEach(function (d) {
+      var p = document.createElement("p");
+      var strong = document.createElement("strong");
+      strong.textContent = d[0] + ": ";
+      p.appendChild(strong);
+      p.appendChild(document.createTextNode(d[1]));
+      result.appendChild(p);
+    });
+  });
+}
+
+/* ==========================================================
+   3. CONTACTS PAGE
+   ========================================================== */
+function initContacts() {
+  var form = document.getElementById("contact-form");
+  if (!form) return;
+
+  var STORAGE_KEY = "typhoonContacts";
+  var nameInput = document.getElementById("contact-name");
+  var phoneInput = document.getElementById("contact-phone");
+  var typeSelect = document.getElementById("contact-type");
+  var errorEl = document.getElementById("contact-error");
+  var listEl = document.getElementById("contact-list");
+  var emptyEl = document.getElementById("contact-empty");
+  var template = document.getElementById("contact-template");
+  var clearAllBtn = document.getElementById("clear-contacts-btn");
+  var clearFormBtn = document.getElementById("clear-form-btn");
+
+  var contacts = loadData(STORAGE_KEY, []);
+
+  function showError(text) {
+    errorEl.textContent = text;
+    errorEl.hidden = false;
+  }
+
+  function hideError() {
+    errorEl.textContent = "";
+    errorEl.hidden = true;
+  }
+
+  // Draw the whole list from the contacts array
+  function render() {
+    listEl.innerHTML = "";
+
+    contacts.forEach(function (contact) {
+      var clone = template.content.cloneNode(true);
+      var li = clone.querySelector(".contact-item");
+      li.dataset.id = contact.id;
+      li.querySelector(".contact-name").textContent = contact.name;
+      li.querySelector(".contact-phone").textContent = contact.phone;
+      li.querySelector(".contact-type").textContent = contact.type;
+      listEl.appendChild(clone);
+    });
+
+    emptyEl.hidden = contacts.length > 0;
+    clearAllBtn.hidden = contacts.length === 0;
+  }
+
+  // Phone check: 7 to 15 digits, may include spaces, dashes, +, ( )
+  function isValidPhone(phone) {
+    if (!/^[0-9+\-()\s]+$/.test(phone)) return false;
+    var digits = phone.replace(/\D/g, "");
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    var name = nameInput.value.trim();
+    var phone = phoneInput.value.trim();
+    var type = typeSelect.value;
+
+    if (name === "") {
+      showError("Please enter a name.");
+      nameInput.focus();
+      return;
+    }
+    if (phone === "") {
+      showError("Please enter a phone number.");
+      phoneInput.focus();
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      showError("Phone number should have 7 to 15 digits and use only numbers, spaces, +, - or ( ).");
+      phoneInput.focus();
+      return;
+    }
+
+    var duplicate = contacts.some(function (c) {
+      return c.name.toLowerCase() === name.toLowerCase() && c.phone === phone;
+    });
+    if (duplicate) {
+      showError("That contact is already saved.");
+      return;
+    }
+
+    hideError();
+    contacts.push({ id: String(Date.now()), name: name, phone: phone, type: type });
+    saveData(STORAGE_KEY, contacts);
+    render();
+    form.reset();
+    nameInput.focus();
+  });
+
+  // Clear form button also hides any error
+  clearFormBtn.addEventListener("click", hideError);
+
+  // Delete one contact (event delegation on the list)
+  listEl.addEventListener("click", function (event) {
+    if (!event.target.classList.contains("contact-delete")) return;
+    var li = event.target.closest(".contact-item");
+    var id = li.dataset.id;
+    contacts = contacts.filter(function (c) { return c.id !== id; });
+    saveData(STORAGE_KEY, contacts);
+    render();
+  });
+
+  // Delete all contacts
+  clearAllBtn.addEventListener("click", function () {
+    if (contacts.length === 0) return;
+    if (confirm("Delete all saved contacts?")) {
+      contacts = [];
+      saveData(STORAGE_KEY, contacts);
+      render();
+    }
+  });
+
+  render();
+}
+</script>
+</body>
+</html>
