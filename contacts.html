@@ -96,5 +96,179 @@
     <p>Typhoon Safety Check.</p>
   </footer>
 
+  <script>
+    const form = document.getElementById("contact-form");
+    const nameInput = document.getElementById("contact-name");
+    const phoneInput = document.getElementById("contact-phone");
+    const typeSelect = document.getElementById("contact-type");
+    const errorBox = document.getElementById("contact-error");
+    const list = document.getElementById("contact-list");
+    const emptyMessage = document.getElementById("contact-empty");
+    const clearAllBtn = document.getElementById("clear-contacts-btn");
+    const template = document.getElementById("contact-template");
+
+    const STORAGE_KEY = "typhoonSafetyContacts"; // name of our saved data
+
+// The array that holds every saved contact:
+// { id: "...", name: "Mama", phone: "0912 345 6789", type: "Family" }
+let contacts = loadContacts();
+
+// ---------- 2. Functions: saving and loading ----------
+function loadContacts() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : []; // use [] if nothing valid is saved
+  } catch (error) {
+    return []; // storage blocked or data broken: start empty
+  }
+}
+
+function saveContacts() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+  } catch (error) {
+    showError("Could not save your contacts in this browser.");
+  }
+}
+
+// ---------- 3. Functions: showing the list ----------
+function renderContacts() {
+  list.innerHTML = ""; // clear the old list first
+
+  contacts.forEach(function (contact) {
+    const item = template.content.firstElementChild.cloneNode(true);
+    item.dataset.id = contact.id;
+    item.querySelector(".contact-name").textContent = contact.name;
+    item.querySelector(".contact-phone").textContent = contact.phone;
+    item.querySelector(".contact-type").textContent = contact.type;
+    list.appendChild(item);
+  });
+
+  // Conditions: show the "no contacts" message only when the list is empty
+  const isEmpty = contacts.length === 0;
+  emptyMessage.hidden = !isEmpty;
+  clearAllBtn.hidden = isEmpty;
+}
+
+// ---------- 4. Functions: error messages ----------
+function showError(message) {
+  errorBox.textContent = message;
+  errorBox.hidden = false;
+}
+
+function clearError() {
+  errorBox.textContent = "";
+  errorBox.hidden = true;
+  nameInput.classList.remove("has-error");
+  phoneInput.classList.remove("has-error");
+}
+
+// ---------- 5. Function: validate the input ----------
+// Returns an error message (text), or "" when everything is fine.
+function validateContact(name, phone) {
+  if (name === "") {
+    nameInput.classList.add("has-error");
+    return "Please enter a name.";
+  }
+  if (name.length < 2) {
+    nameInput.classList.add("has-error");
+    return "The name must be at least 2 characters.";
+  }
+
+  if (phone === "") {
+    phoneInput.classList.add("has-error");
+    return "Please enter a phone number.";
+  }
+
+  // Allowed: digits, spaces, dashes, brackets, and a + at the start
+  if (!/^\+?[0-9\s\-()]+$/.test(phone)) {
+    phoneInput.classList.add("has-error");
+    return "The phone number can only have numbers, spaces, dashes, and a + at the start.";
+  }
+
+  // Count only the digits: 3 digits allows hotlines like 911
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 3 || digits.length > 15) {
+    phoneInput.classList.add("has-error");
+    return "The phone number must have 3 to 15 digits.";
+  }
+
+  // No duplicate numbers
+  const duplicate = contacts.find(function (contact) {
+    return contact.phone.replace(/\D/g, "") === digits;
+  });
+  if (duplicate) {
+    phoneInput.classList.add("has-error");
+    return "This number is already saved under " + duplicate.name + ".";
+  }
+
+  return ""; // no problem found
+}
+
+// ---------- 6. Events ----------
+
+// Add a contact when the form is submitted
+form.addEventListener("submit", function (event) {
+  event.preventDefault(); // stop the page from reloading
+  clearError();
+
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const message = validateContact(name, phone);
+
+  if (message !== "") {
+    showError(message);
+    // Put the cursor in the first box that has a problem
+    (nameInput.classList.contains("has-error") ? nameInput : phoneInput).focus();
+    return;
+  }
+
+  contacts.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: name,
+    phone: phone,
+    type: typeSelect.value
+  });
+
+  saveContacts();
+  renderContacts();
+  form.reset();
+  nameInput.focus();
+});
+
+// Remove error styling as soon as the user starts typing again
+[nameInput, phoneInput].forEach(function (input) {
+  input.addEventListener("input", clearError);
+});
+
+// "Clear form" button also clears any error
+form.addEventListener("reset", clearError);
+
+// Delete one contact (one listener on the list handles every Delete button)
+list.addEventListener("click", function (event) {
+  const button = event.target.closest(".contact-delete");
+  if (!button) return; // the click was not on a Delete button
+
+  const id = button.closest(".contact-item").dataset.id;
+  contacts = contacts.filter(function (contact) {
+    return contact.id !== id;
+  });
+  saveContacts();
+  renderContacts();
+});
+
+// Delete all contacts (ask first so nothing is lost by accident)
+clearAllBtn.addEventListener("click", function () {
+  if (confirm("Delete all saved contacts?")) {
+    contacts = [];
+    saveContacts();
+    renderContacts();
+  }
+});
+
+// ---------- 7. Start: show the saved contacts when the page opens ----------
+renderContacts();
+  </script>
+
 </body>
 </html>
